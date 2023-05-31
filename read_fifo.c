@@ -203,13 +203,12 @@ int main(int argc, char *argv[]) {
     exit(0);
   
   } else {
-
+    
     printf("hello i'm the father\n");
 
     wait(NULL);
 
     printf("YOU KILL MY CHILD!!!\n");
-    
   }
 
 
