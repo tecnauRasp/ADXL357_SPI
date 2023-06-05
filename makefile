@@ -1,10 +1,17 @@
 FLAGS = -pthread
 
 compile:
-	gcc -o read_fifo read_fifo.c adxl357.c $(FLAGS)
+	gcc -o read_fifo read_fifo.c adxl357.c
 
 compile_test:
-	gcc -o thread_test thread_test.c adxl357.c $(FLAGS)
+	gcc -o process_test process_test.c adxl357.c
+
+run_test:
+	./process_test
+
+c_and_r_test:
+	make compile_test
+	make run_test
 
 run:
 	./read_fifo

@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <errno.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 #include "adxl357.h"
 
@@ -63,9 +61,6 @@ int main(int argc, char *argv[]) {
 
   int ciclo = 0;
   clock_t begin = clock();
-
-  
-  if(fork() == 0) {
   
     while (1) {  
       long rawX = 0, rawY = 0, rawZ = 0;
@@ -202,14 +197,7 @@ int main(int argc, char *argv[]) {
 
     exit(0);
   
-  } else {
-    
-    printf("hello i'm the father\n");
-
-    wait(NULL);
-
-    printf("YOU KILL MY CHILD!!!\n");
-  }
+  
 
 
 
