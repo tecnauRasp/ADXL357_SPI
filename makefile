@@ -1,5 +1,3 @@
-FLAGS = -pthread
-
 compile:
 	gcc -o read_fifo read_fifo.c adxl357.c
 
