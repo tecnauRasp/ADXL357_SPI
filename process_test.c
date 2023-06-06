@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/time.h>
 #include <signal.h>
 #include <time.h>
 #include <errno.h>
@@ -10,6 +11,7 @@
 #include "adxl357.h"
 
 #define DATA_SIZE 3
+#define TIME_MAX_FILE 30
 
 #define CE_ADXL 0
 #define CSV_FILE_PATH "./CsvRecords/"
@@ -17,7 +19,6 @@
 float OutputDataRate = 4000;        // 4KHz
 float SamplingInterval = 0.00025;   // 1/4000 = 250ms
 
-int number_of_out_files = -1;
 pid_t pid1, pid2;
 int pipefd[2];
 
@@ -34,6 +35,8 @@ void childReadFromSensor(int pipeWriteEnd) {
     //struct timespec starttime, stoptime;
     unsigned char isX = 0, isNotY = 0, isNotZ = 0;
     unsigned char write_flag = 0, isFifoAligned = 0;
+    long rawX = 0, rawY = 0, rawZ = 0;
+    unsigned char isEmptyX = 0, isEmptyY = 0, isEmptyZ = 0; 
 
     // logFile = fopen("logFile.txt", "w+");
 
@@ -50,10 +53,6 @@ void childReadFromSensor(int pipeWriteEnd) {
     int ciclo = 0;
     
     while (1) {
-        // Simulate reading data from the sensor
-        long rawX = 0, rawY = 0, rawZ = 0;
-        unsigned char isEmptyX = 0, isEmptyY = 0, isEmptyZ = 0; 
-    
 
         // get status
         int status = Adxl357_GetStatus(spi0);
@@ -151,13 +150,16 @@ void childWriteInFile(int pipeReadEnd) {
 
     sprintf(fileName, "%s%s", CSV_FILE_PATH, "OutData");
 
-    number_of_out_files++;
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+
     char name[255];
-    sprintf(name, "%s%d.csv", fileName, number_of_out_files);
+    sprintf(name, "%s_%d-%02d-%02d_%02d-%02d-%02d.csv", fileName, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
     outFile = fopen(name, "w+");
     logFile = fopen("logFile.txt", "w+");
 
-    clock_t begin = clock();
+    struct timeval starttime, endtime;
+    gettimeofday(&starttime, NULL);
 
     while(1) {
         
@@ -167,23 +169,27 @@ void childWriteInFile(int pipeReadEnd) {
         // Write the data to the file
         float accX = 0, accY = 0, accZ = 0;
 
-        sample_time = (float)(clock() - begin) / CLOCKS_PER_SEC;
+        gettimeofday(&endtime, NULL);
+		float sample_time = endtime.tv_sec - starttime.tv_sec + (endtime.tv_usec - starttime.tv_usec) / 1e6;
+
         accX = Adxl357_ConvertAccelData(data[0], ADXL357_RANGE_40G);
         accY = Adxl357_ConvertAccelData(data[1], ADXL357_RANGE_40G);
         accZ = Adxl357_ConvertAccelData(data[2], ADXL357_RANGE_40G);
-        fprintf(outFile, "%d; %f; %f; %f; %f;\n", sample, sample_time, accX, accY, accZ);
+        fprintf(outFile, "%d; %f; %f; %f; %f;\n", sample++, sample_time, accX, accY, accZ);
         // printf("Data converted: X=%f / Y=%f / Z=%f.\n", accX, accY, accZ);
-        sample++;
+        // printf("time = %lf\n", sample_time);
+        
 
-
-        //Open another file after 30 sec
-        if ((long)(clock() - begin) / CLOCKS_PER_SEC >= 10) {
-            printf("time passed = %d\n", (long)(clock() - begin) / CLOCKS_PER_SEC);
+        //Open another file after TIME_MAX_FILE seconds
+        if (sample_time >= TIME_MAX_FILE) {
+            // printf("time passed = %f\n", sample_time);
             sample = 0;
-            begin = clock();
+            gettimeofday(&starttime, NULL);
 
             fclose(outFile);
-            sprintf(name, "%s%d.csv", fileName, ++number_of_out_files);
+            t = time(NULL);
+            tm = *localtime(&t);
+            sprintf(name, "%s_%d-%02d-%02d_%02d-%02d-%02d.csv", fileName, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
             outFile = fopen(name, "w+");
         }
     }
