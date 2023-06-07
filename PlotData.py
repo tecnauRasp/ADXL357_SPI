@@ -8,7 +8,7 @@ import sys
 
 csvFilename = input('CSV file name: ')
 
-df = pd.read_csv(csvFilename, names=['Index', 'Time', 'X', 'Y','Z'], header=None, sep=';', index_col=False)
+df = pd.read_csv(csvFilename, names=['Time', 'X', 'Y','Z'], header=1, sep=';', index_col=False)
 
 df = df.dropna()
 

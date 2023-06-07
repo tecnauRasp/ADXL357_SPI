@@ -11,7 +11,7 @@
 #include "adxl357.h"
 
 #define DATA_SIZE 3
-#define TIME_MAX_FILE 5
+#define TIME_MAX_FILE 30
 
 #define CE_ADXL 0
 #define CSV_FILE_PATH "./CsvRecords/"
