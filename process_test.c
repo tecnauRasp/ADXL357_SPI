@@ -11,13 +11,15 @@
 #include "adxl357.h"
 
 #define DATA_SIZE 3
-#define TIME_MAX_FILE 30
+#define TIME_MAX_FILE 5
 
 #define CE_ADXL 0
 #define CSV_FILE_PATH "./CsvRecords/"
 
 float OutputDataRate = 4000;        // 4KHz
 float SamplingInterval = 0.00025;   // 1/4000 = 250ms
+
+FILE *outFile, *logFile;
 
 pid_t pid1, pid2;
 int pipefd[2];
@@ -137,29 +139,28 @@ void childReadFromSensor(int pipeWriteEnd) {
     exit(0);
 }
 
+void createNewFile(struct tm tm, struct timeval micro){
+    char fileName[255];
+    sprintf(fileName, "%s%s", CSV_FILE_PATH, "OutData");
 
+    char name[255];
+    sprintf(name, "%s_%d-%02d-%02d_%02d-%02d-%02d-%06d.csv", fileName, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, micro.tv_usec);
+    outFile = fopen(name, "w+");
+    fprintf(outFile, "time; x; y; z;\n");
+}
 
 void childWriteInFile(int pipeReadEnd) {
     long data[DATA_SIZE];
     int sample = 0;
-    float sample_time = 0;
+    float sample_time = 0;   
     
-
-    FILE *outFile, *logFile;
-    char fileName[255];
-
-    sprintf(fileName, "%s%s", CSV_FILE_PATH, "OutData");
-
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
 
-    char name[255];
-    sprintf(name, "%s_%d-%02d-%02d_%02d-%02d-%02d.csv", fileName, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
-    outFile = fopen(name, "w+");
-    logFile = fopen("logFile.txt", "w+");
-
     struct timeval starttime, endtime;
     gettimeofday(&starttime, NULL);
+
+    createNewFile(tm, starttime);
 
     while(1) {
         
@@ -175,7 +176,7 @@ void childWriteInFile(int pipeReadEnd) {
         accX = Adxl357_ConvertAccelData(data[0], ADXL357_RANGE_40G);
         accY = Adxl357_ConvertAccelData(data[1], ADXL357_RANGE_40G);
         accZ = Adxl357_ConvertAccelData(data[2], ADXL357_RANGE_40G);
-        fprintf(outFile, "%d; %f; %f; %f; %f;\n", sample++, sample_time, accX, accY, accZ);
+        fprintf(outFile, "%.5f; %f; %f; %f;\n", sample_time, accX, accY, accZ);
         // printf("Data converted: X=%f / Y=%f / Z=%f.\n", accX, accY, accZ);
         // printf("time = %lf\n", sample_time);
         
@@ -189,8 +190,8 @@ void childWriteInFile(int pipeReadEnd) {
             fclose(outFile);
             t = time(NULL);
             tm = *localtime(&t);
-            sprintf(name, "%s_%d-%02d-%02d_%02d-%02d-%02d.csv", fileName, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
-            outFile = fopen(name, "w+");
+            
+            createNewFile(tm, starttime);
         }
     }
 

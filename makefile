@@ -1,20 +1,20 @@
 
 
 compile:
-	gcc -o process_test process_test.c adxl357.c
+	gcc -o bin/process_test process_test.c adxl357.c
 
 run:
-	./process_test
+	./bin/process_test
 
 c_and_r:
 	make compile
 	make run
 
 compile_original:
-	gcc -o read_fifo read_fifo.c adxl357.c
+	gcc -o bin/read_fifo read_fifo.c adxl357.c
 
 run_original:
-	./read_fifo
+	./bin/read_fifo
 
 c_and_r_original:
 	make compile_original
