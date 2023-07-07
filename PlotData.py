@@ -4,11 +4,15 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import numpy as np
 import scipy.fftpack
-import sys
+import os
+
+dir_path = "CsvRecords/"
 
 csvFilename = input('CSV file name: ')
 
-df = pd.read_csv(csvFilename, names=['Time', 'X', 'Y','Z'], header=1, sep=';', index_col=False)
+csv_path = os.path.join(dir_path, csvFilename + ".csv")
+
+df = pd.read_csv(csv_path, names=['Time', 'X', 'Y','Z', 'temp'], header=1, sep=';', index_col=False)
 
 df = df.dropna()
 
