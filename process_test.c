@@ -149,7 +149,7 @@ void createNewFile(struct tm tm, struct timeval micro){
     fprintf(outFile, "time; x; y; z;\n");
 }
 
-void childWriteInFile(int pipeReadEnd) {
+void parentWriteInFile(int pipeReadEnd) {
     long data[DATA_SIZE];
     int sample = 0;
     float sample_time = 0;   
@@ -219,7 +219,7 @@ int main() {
 
     } else {
         close(pipefd[1]); // Close the unused write end of the pipe in the child process
-        childWriteInFile(pipefd[0]);
+        parentWriteInFile(pipefd[0]);
     }
 
     return 0;

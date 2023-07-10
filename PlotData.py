@@ -12,7 +12,13 @@ csvFilename = input('CSV file name: ')
 
 csv_path = os.path.join(dir_path, csvFilename + ".csv")
 
-df = pd.read_csv(csv_path, names=['Time', 'X', 'Y','Z', 'temp'], header=1, sep=';', index_col=False)
+params = ['Time', 'X', 'Y','Z', 'temp']
+df = pd.read_csv(csv_path, names=params, header=1, sep=';', index_col=False, decimal=".")
+
+# for p in params:
+#     df[p] = pd.to_numeric(df[p], errors='corece')
+
+
 
 df = df.dropna()
 
