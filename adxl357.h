@@ -111,6 +111,11 @@ unsigned char Adxl357_GetDeviceVer(int spi);
 unsigned char Adxl357_GetStatus(int spi);
 unsigned char Adxl357_IsDataReady(int spi);
 unsigned char Adxl357_GetFifoEntries(int spi);
+
+unsigned char Adxl357_GetRegTemp1(int spi);
+unsigned char Adxl357_GetRegTemp2(int spi);
+float Adxl357_ConvertTempData(int temp1, int temp2);
+
 float Adxl357_ConvertAccelData(long value, unsigned char range);
 void Adxl357_GetRawAccelFromFifo(int spi, long *x, unsigned char *isValid, unsigned char *isX);
 void Adxl357_SetPowerCtl(int spi, unsigned char value);

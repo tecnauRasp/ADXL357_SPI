@@ -142,6 +142,45 @@ unsigned char Adxl357_GetStatus(int spi) {
   return a[0];
 }
 
+
+unsigned char Adxl357_GetRegTemp1(int spi) {
+  char a[2];
+
+  Adxl357_Read(spi, ADXL357_REG_TEMP1, 1, a);
+
+  return a[0];
+}
+
+unsigned char Adxl357_GetRegTemp2(int spi) {
+  char a[2];
+
+  Adxl357_Read(spi, ADXL357_REG_TEMP2, 1, a);
+
+  return a[0];
+}
+
+// void bin(unsigned n, int bit) {
+//   unsigned i;
+//   for (i = 1 << bit-1; i>0; i = i/2)
+//     (n & i) ? printf("1") : printf("0");
+// }
+
+float Adxl357_ConvertTempData(int temp1, int temp2) {
+  // printf("\ntemp1 = %d; ", temp1);
+  // bin(temp1, 8);
+  // printf("\ntemp2 = %d; ", temp2);
+  // bin(temp2, 4);
+
+  int mask =  0x0F; // temp2 mask -> 0000 1111 (first 4 bits no info)
+  int value = temp1 | ((temp2 & mask) << 8); //temp1 bits[7:0] temp2 bits[11:8] 
+  // printf("\nvalue = %d; ", value);
+  // bin(value, 12);
+
+  return (float) (-(1/9.05) * (value - 1885)) + 25; // scale = -9.05 LSB/C° -- 1885 LSB = 25 C°
+}
+
+
+
 unsigned char Adxl357_IsDataReady(int spi) {
   unsigned char a[2];
 
