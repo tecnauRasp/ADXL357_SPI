@@ -15,6 +15,7 @@
 
 #define CE_ADXL 0
 #define CSV_FILE_PATH "./CsvRecords/"
+#define OUTPUT_FILE_NAME "AccData"
 
 float OutputDataRate = 4000;        // 4KHz
 float SamplingInterval = 0.00025;   // 1/4000 = 250ms
@@ -141,10 +142,10 @@ void childReadFromSensor(int pipeWriteEnd) {
 
 void createNewFile(struct tm tm, struct timeval micro){
     char fileName[255];
-    sprintf(fileName, "%s%s", CSV_FILE_PATH, "OutData");
+    sprintf(fileName, "%s%s", CSV_FILE_PATH, OUTPUT_FILE_NAME);
 
     char name[255];
-    sprintf(name, "%s_%d-%02d-%02d_%02d-%02d-%02d-%06d.csv", fileName, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, micro.tv_usec);
+    sprintf(name, "%s_%d-%02d-%02d_%02d-%02d-%02d.csv", fileName, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
     outFile = fopen(name, "w+");
     fprintf(outFile, "time; x; y; z;\n");
 }

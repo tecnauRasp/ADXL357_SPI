@@ -2,9 +2,10 @@
 
 compile:
 	gcc -o bin/read_acceleration read_acceleration.c adxl357.c
+	gcc -o bin/read_temperature read_temperature.c adxl357.c
 
 run:
-	./bin/read_acceleration
+	./bin/read_acceleration & ./bin/read_temperature && fg
 
 plot:
 	python3 ./PlotData.py
