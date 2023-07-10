@@ -11,7 +11,7 @@
 #include "adxl357.h"
 
 #define DATA_SIZE 3
-#define TIME_MAX_FILE 30
+#define TIME_MAX_FILE 60
 
 #define CE_ADXL 0
 #define CSV_FILE_PATH "./RecordsAcc/"
@@ -60,7 +60,7 @@ void childReadFromSensor(int pipeWriteEnd) {
         // get status
         int status = Adxl357_GetStatus(spi0);
         // int dataReady = (status & ADXL357_REG_STATUS_BIT_DATA_RDY) ? 1 : 0;
-        // int fifoFull = (status & ADXL357_REG_STATUS_BIT_FIFO_FULL) ? 1 : 0;
+        int fifoFull = (status & ADXL357_REG_STATUS_BIT_FIFO_FULL) ? 1 : 0;
         int fifoOvr = (status & ADXL357_REG_STATUS_BIT_FIFO_OVR) ? 1 : 0;
         unsigned char fifoEntries = Adxl357_GetFifoEntries(spi0);
 
@@ -70,7 +70,7 @@ void childReadFromSensor(int pipeWriteEnd) {
 
         // clock_gettime(CLOCK_MONOTONIC, &starttime);
 
-        if (fifoOvr) {
+        if (fifoOvr || fifoFull) {
             // fprintf(logFile, "FIFO has overrun.\n");
             printf("FIFO has overrun.\n");
             exit(0);

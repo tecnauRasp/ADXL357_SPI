@@ -11,14 +11,14 @@
 #include "adxl357.h"
 
 #define DATA_SIZE 2
-#define TIME_MAX_FILE 30
+#define TIME_MAX_FILE 60
 
 #define CE_ADXL 0
 #define CSV_FILE_PATH "./RecordsTemp/"
 #define OUTPUT_FILE_NAME "TempData"
 
 float OutputDataRate = 4000;        // 4KHz
-float SamplingInterval = 0.00025;   // 1/4000 = 0.25ms
+float SamplingInterval = 0.00025;   // 1/4000 = 250us
 
 FILE *outFile, *logFile;
 

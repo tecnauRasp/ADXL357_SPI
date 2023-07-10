@@ -5,7 +5,10 @@ compile:
 	gcc -o bin/read_temperature read_temperature.c adxl357.c
 
 run:
-	./bin/read_acceleration &
+	./bin/read_acceleration
+
+run_t:
+	make run &
 	./bin/read_temperature &
 	
 
@@ -16,5 +19,5 @@ clean:
 	-rm *.o ./bin/*
 
 delete_csv:
-	-rm ./CsvRecords/*
-
+	-rm ./RecordsAcc/*
+	-rm ./RecordsTemp/*
