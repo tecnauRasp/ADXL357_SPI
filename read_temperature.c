@@ -10,15 +10,15 @@
 #include <unistd.h>
 #include "adxl357.h"
 
-#define DATA_SIZE 5
+#define DATA_SIZE 2
 #define TIME_MAX_FILE 30
 
 #define CE_ADXL 0
-#define CSV_FILE_PATH "./CsvRecords/"
+#define CSV_FILE_PATH "./RecordsTemp/"
 #define OUTPUT_FILE_NAME "TempData"
 
 float OutputDataRate = 4000;        // 4KHz
-float SamplingInterval = 0.00025;   // 1/4000 = 250ms
+float SamplingInterval = 0.00025;   // 1/4000 = 0.25ms
 
 FILE *outFile, *logFile;
 
@@ -41,6 +41,10 @@ void childReadFromSensor(int pipeWriteEnd) {
     long rawX = 0, rawY = 0, rawZ = 0;
     unsigned char isEmptyX = 0, isEmptyY = 0, isEmptyZ = 0;
 
+    // struct timespec ts;
+    // ts.tv_sec = 0;
+    // ts.tv_nsec = 250000;
+
     // logFile = fopen("logFile.txt", "w+");
 
     Adxl357_Init(&spi0, ce0, ADXL357_SPIBITS_8, SPI_MODE_0, ADXL357_SPISPEED_10MHZ);
@@ -52,96 +56,21 @@ void childReadFromSensor(int pipeWriteEnd) {
     unsigned char deviceId = Adxl357_GetDeviceId(spi0);
     printf("Device ID = %d\n", deviceId);
     
-
-    int ciclo = 0;
     
     while (1) {
 
-        // get status
-        int status = Adxl357_GetStatus(spi0);
-        // int dataReady = (status & ADXL357_REG_STATUS_BIT_DATA_RDY) ? 1 : 0;
-        // int fifoFull = (status & ADXL357_REG_STATUS_BIT_FIFO_FULL) ? 1 : 0;
-        int fifoOvr = (status & ADXL357_REG_STATUS_BIT_FIFO_OVR) ? 1 : 0;
-        unsigned char fifoEntries = Adxl357_GetFifoEntries(spi0);
+        usleep(100);
 
-        // fprintf(logFile, "Status=%d - DataReady=%d - FifoFull=%d - FifoOvr=%d.- FifoEntries=%d\n", status, dataReady, fifoFull, fifoOvr, fifoEntries);
-        // printf("Status=%d - DataReady=%d - FifoFull=%d - FifoOvr=%d- FifoEntries=%d\n", status, dataReady, fifoFull, fifoOvr, fifoEntries);
-        // printf("Ciclo=%d - Entries=%d\n", ciclo, fifoEntries);
-
-        // clock_gettime(CLOCK_MONOTONIC, &starttime);
-
-        if (fifoOvr) {
-            // fprintf(logFile, "FIFO has overrun.\n");
-            printf("FIFO has overrun.\n");
-            exit(0);
-            // isFifoAligned = 0;
-            
-        }
-
-        while (fifoEntries > 0) {
-        
-            if (!isFifoAligned) {
-                // read data
-                Adxl357_GetRawAccelFromFifo(spi0, &rawX, &isEmptyX, &isX);
-
-                if (!isEmptyX && isX) {
-                    Adxl357_GetRawAccelFromFifo(spi0, &rawY, &isEmptyY, &isNotY);
-                    Adxl357_GetRawAccelFromFifo(spi0, &rawZ, &isEmptyZ, &isNotZ);
-                    write_flag = 1;
-                    
-                    // fprintf(logFile, "X detected (FifoEntries=%d).\n", (fifoEntries + 1));
-                    // printf("X detected (FifoEntries=%d).\n", (fifoEntries + 1));
-                    // printf("X=%d(%d)", rawX, (fifoEntries + 1));
-                }
-                
-            } else {
-                // read data
-                Adxl357_GetRawAccelFromFifo(spi0, &rawX, &isEmptyX, &isX);
-                Adxl357_GetRawAccelFromFifo(spi0, &rawY, &isEmptyY, &isNotY);
-                Adxl357_GetRawAccelFromFifo(spi0, &rawZ, &isEmptyZ, &isNotZ);
-
-                
-                write_flag = 1;
-
-                 
-
-                // check data
-                if (isEmptyX || !isX || isEmptyY || isNotY || isEmptyZ || isNotZ) {
-                    // fprintf(logFile, "FIFO X data incorrect (isEmpty=%d / isX=%d).\n", isEmptyX, isX);
-                    printf("FIFO data incorrect (isEmptyX=%d / isX=%d ) (isEmptyY=%d / isNotY=%d ) (isEmptyZ=%d / isNotZ=%d ).\n", isEmptyX, isX);
-                    close(pipeWriteEnd);
-                    kill(getppid(), SIGTERM);
-                    exit(0);
-                }
-
-            }
-
-            // Write the sensor data to the pipe
-            if (write_flag) {                // Write the sensor data to the pipe
-                data[0] = rawX;
-                data[1] = rawY;
-                data[2] = rawZ;
-                data[3] = Adxl357_GetRegTemp1(spi0);
-                data[4] = Adxl357_GetRegTemp2(spi0);
-
-                // printf("X=%d(%d-%d-%d)", rawX, fifoEntries, isEmptyX, isX);
-                // printf("Y=%d(%d-%d-%d)", rawY, fifoEntries, isEmptyY, isX);
-                // printf("Z=%d(%d-%d-%d)", rawY, fifoEntries, isEmptyY, isX);   
-
-                write(pipeWriteEnd, data, sizeof(data));
-                write_flag = 0;
-
-            }
-
-            unsigned char fifoEntries = Adxl357_GetFifoEntries(spi0);
-
-        }    
+        data[0] = Adxl357_GetRegTemp1(spi0);
+        data[1] = Adxl357_GetRegTemp2(spi0);
+        write(pipeWriteEnd, data, sizeof(data));
     }
 
     close(pipeWriteEnd);
     kill(getppid(), SIGTERM);
     exit(0);
 }
+
 
 void createNewFile(struct tm tm, struct timeval micro){
     char fileName[255];
@@ -153,7 +82,7 @@ void createNewFile(struct tm tm, struct timeval micro){
     fprintf(outFile, "time; x; y; z; temp;\n");
 }
 
-void childWriteInFile(int pipeReadEnd) {
+void parentWriteInFile(int pipeReadEnd) {
     long data[DATA_SIZE];
     int sample = 0;
     float sample_time = 0;   
@@ -178,11 +107,8 @@ void childWriteInFile(int pipeReadEnd) {
         gettimeofday(&endtime, NULL);
 		float sample_time = endtime.tv_sec - starttime.tv_sec + (endtime.tv_usec - starttime.tv_usec) / 1e6;
 
-        accX = Adxl357_ConvertAccelData(data[0], ADXL357_RANGE_40G);
-        accY = Adxl357_ConvertAccelData(data[1], ADXL357_RANGE_40G);
-        accZ = Adxl357_ConvertAccelData(data[2], ADXL357_RANGE_40G);
-        temp = Adxl357_ConvertTempData(data[3], data[4]);
-        fprintf(outFile, "%.5f; %f; %f; %f; %f;\n", sample_time, accX, accY, accZ, temp);
+        temp = Adxl357_ConvertTempData(data[0], data[1]);
+        fprintf(outFile, "%.5f; %f;\n", sample_time, temp);
         // printf("Data converted: X=%f / Y=%f / Z=%f.\n", accX, accY, accZ);
         // printf("time = %lf\n", sample_time);
         
@@ -225,7 +151,7 @@ int main() {
 
     } else {
         close(pipefd[1]); // Close the unused write end of the pipe in the child process
-        childWriteInFile(pipefd[0]);
+        parentWriteInFile(pipefd[0]);
     }
 
     return 0;

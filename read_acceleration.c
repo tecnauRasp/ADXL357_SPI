@@ -14,7 +14,7 @@
 #define TIME_MAX_FILE 30
 
 #define CE_ADXL 0
-#define CSV_FILE_PATH "./CsvRecords/"
+#define CSV_FILE_PATH "./RecordsAcc/"
 #define OUTPUT_FILE_NAME "AccData"
 
 float OutputDataRate = 4000;        // 4KHz

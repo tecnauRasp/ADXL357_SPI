@@ -5,7 +5,9 @@ compile:
 	gcc -o bin/read_temperature read_temperature.c adxl357.c
 
 run:
-	./bin/read_acceleration & ./bin/read_temperature && fg
+	./bin/read_acceleration &
+	./bin/read_temperature &
+	
 
 plot:
 	python3 ./PlotData.py
