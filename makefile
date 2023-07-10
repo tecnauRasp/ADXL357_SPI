@@ -1,10 +1,10 @@
 
 
 compile:
-	gcc -o bin/process_test process_test.c adxl357.c
+	gcc -o bin/read_acceleration read_acceleration.c adxl357.c
 
 run:
-	./bin/process_test
+	./bin/read_acceleration
 
 plot:
 	python3 ./PlotData.py
