@@ -6,13 +6,13 @@ import numpy as np
 import scipy.fftpack
 import os
 
-dir_path = "CsvRecords/"
+dir_path = "RecordsAcc/"
 
 csvFilename = input('CSV file name: ')
 
 csv_path = os.path.join(dir_path, csvFilename + ".csv")
 
-params = ['Time', 'X', 'Y','Z', 'temp']
+params = ['Time', 'X', 'Y','Z']
 df = pd.read_csv(csv_path, names=params, header=1, sep=';', index_col=False, decimal=".")
 
 # for p in params:

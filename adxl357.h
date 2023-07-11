@@ -99,6 +99,8 @@
 #define ADXL357_REG_STATUS_BIT_DATA_RDY	    0x01	// a compete x-axis, y-axis and z-xis measurement was made and results can be read
 
 
+#define OFFSET_TEMPERATURE -3                       // in the experiment qith the NI we have a 3 °C differences at 30 °C
+
 
 int Adxl357_Init(int *spi, unsigned char ce, unsigned char bits, unsigned short mode, unsigned int speed);
 
@@ -111,6 +113,8 @@ unsigned char Adxl357_GetDeviceVer(int spi);
 unsigned char Adxl357_GetStatus(int spi);
 unsigned char Adxl357_IsDataReady(int spi);
 unsigned char Adxl357_GetFifoEntries(int spi);
+
+
 
 unsigned char Adxl357_GetRegTemp1(int spi);
 unsigned char Adxl357_GetRegTemp2(int spi);

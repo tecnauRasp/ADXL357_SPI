@@ -1,5 +1,6 @@
 #include "adxl357.h"
 
+
 //unsigned char spi_bits = SPI_BITS_ADXL;
 //unsigned int spi_speed = SPI_SPEED_ADXL; 
 //unsigned short spi_mode = SPI_MODE_0;
@@ -176,7 +177,7 @@ float Adxl357_ConvertTempData(int temp1, int temp2) {
   // printf("\nvalue = %d; ", value);
   // bin(value, 12);
 
-  return (float) (-(1/9.05) * (value - 1885)) + 25; // scale = -9.05 LSB/C° -- 1885 LSB = 25 C°
+  return (float) (-(1/9.05) * (value - 1885)) + 25 + OFFSET_TEMPERATURE; // scale = -9.05 LSB/C° -- 1885 LSB = 25 C°
 }
 
 

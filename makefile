@@ -8,7 +8,7 @@ run:
 	./bin/read_acceleration
 
 run_t:
-	make run &
+	./bin/read_acceleration &
 	./bin/read_temperature &
 	
 

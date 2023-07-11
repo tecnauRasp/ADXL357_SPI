@@ -45,7 +45,7 @@ void childReadFromSensor(int pipeWriteEnd) {
 
     Adxl357_Init(&spi0, ce0, ADXL357_SPIBITS_8, SPI_MODE_0, ADXL357_SPISPEED_10MHZ);
     Adxl357_Reset(spi0);
-    Adxl357_SetFilter(spi0, ADXL357_ODR_HPF_CORNER_NONE, ADXL357_ODR_LPF_4000Hz_1000Hz);
+    Adxl357_SetFilter(spi0, ADXL357_ODR_HPF_CORNER_NONE, ADXL357_ODR_LPF_2000Hz_500Hz);
     Adxl357_SetAccelRange(spi0, ADXL357_RANGE_40G);
     Adxl357_SetPowerCtl(spi0, ADXL357_POWER_ALL_ON/*0x06*/);
 
